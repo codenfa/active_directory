@@ -22,9 +22,28 @@ module ActiveDirectory
   class User < Base
     include Member
 
-    UAC_ACCOUNT_DISABLED = 0x0002
+    UAC_ACCOUNT_DISABLED = 0x0002 # 2
     UAC_NORMAL_ACCOUNT   = 0x0200 # 512
     UAC_PASSWORD_NEVER_EXPIRES = 0x10000 # 65536
+    UAC_LOCKOUT = 0x0010 # 16
+    UAC_PASSWORD_EXPIRED = 0x800000 # 8388608
+
+    UAC_SCRIPT = 0x0001 # 1
+    UAC_HOMEDIR_REQUIRED = 0x0008 # 8
+    UAC_PASSWD_NOTREQD = 0x0020 # 32
+    UAC_ENCRYPTED_TEXT_PWD_ALLOWED = 0x0080 # 128
+    UAC_TEMP_DUPLICATE_ACCOUNT = 0x0100 # 256
+    UAC_INTERDOMAIN_TRUST_ACCOUNT =  0x0800 # 2048
+    UAC_WORKSTATION_TRUST_ACCOUNT =  0x1000 # 4096
+    UAC_SERVER_TRUST_ACCOUNT = 0x2000 # 8192
+    UAC_MNS_LOGON_ACCOUNT =  0x20000 # 131072
+    UAC_SMARTCARD_REQUIRED = 0x40000 # 262144
+    UAC_TRUSTED_FOR_DELEGATION = 0x80000 # 524288
+    UAC_NOT_DELEGATED =  0x100000 # 1048576
+    UAC_USE_DES_KEY_ONLY = 0x200000 # 2097152
+    UAC_DONT_REQ_PREAUTH = 0x400000 # 4194304
+    UAC_TRUSTED_TO_AUTH_FOR_DELEGATION = 0x1000000 # 16777216
+    UAC_PARTIAL_SECRETS_ACCOUNT =  0x04000000 # 67108864
 
     def self.filter # :nodoc:
       Net::LDAP::Filter.eq(:objectClass, 'user') & ~Net::LDAP::Filter.eq(:objectClass, 'computer')
@@ -140,7 +159,7 @@ module ActiveDirectory
     # out).
     #
     def can_login?
-      !disabled? && !locked?
+      !disabled? && !locked? && !expired?
     end
 
     #
